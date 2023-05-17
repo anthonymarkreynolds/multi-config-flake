@@ -111,7 +111,7 @@
 {
   name = "hop-nvim";
   url = "https://github.com/phaazon/hop.nvim/archive/refs/heads/master.tar.gz";
-  sha256 = "18akjbplhp27di5l0bi9yd2haysgvw8yv3yk6cgwbizmk6inb5ji";
+  sha256 = "0f22abf4j3ncrs1ngp9p9m8wrhvpk9ckh76wapljvyblv9nwbn65";
 }
 
 {

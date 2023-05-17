@@ -3,17 +3,23 @@
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-22.11";
-    unstable.url = "github:NixOS/nixpkgs/nixos-unstable";
+    nixpkgs-unstable.url = "github:NixOS/nixpkgs/nixos-unstable";
     home-manager.url = "github:nix-community/home-manager";
   };
 
-  outputs = { self, nixpkgs, unstable, home-manager, ... }:
+  outputs = { self, nixpkgs, nixpkgs-unstable, home-manager, ... }:
     let
       system = "x86_64-linux";
-      pkgs = nixpkgs.legacyPackages.${system};
-      unstablePkgs = unstable.legacyPackages.${system};
+      pkgs = import nixpkgs {
+        inherit system;
+      };
+      unstablePkgs = import nixpkgs-unstable {
+        inherit system;
+      };
+      lib = nixpkgs.lib;
+      myNvim = self.packages.${system}.neovim-custom;
       nvimPath = ./src/programs/neovim-custom;
-      pluginList = import (nvimPath + "plugins-list.nix;");
+      pluginList = import "${nvimPath}/plugins-list.nix";
       buildVimPlugin = { name, url, sha256 }: pkgs.vimUtils.buildVimPluginFrom2Nix {
         pname = name;
         version = "latest";
@@ -21,9 +27,8 @@
           inherit url sha256;
         };
       };
-      myVimPlugins = (map buildVimPlugin pluginList);
 
-    in rec {
+    in {
       packages.${system} = {
         neovim-custom-config = pkgs.stdenv.mkDerivation {
           name = "neovim-custom-config";
@@ -44,7 +49,7 @@
               # add plugins from nixpkgs here
               start = [
                 nvim-treesitter.withAllGrammars
-              ] ++ myVimPlugins;
+              ] ++ (map buildVimPlugin pluginList);
             };
           };
         };
@@ -55,27 +60,22 @@
           ]);
         in pkgs.writeScriptBin "update-plugins" ''
           #!${pkgs.runtimeShell}
-          ${pythonEnv}/bin/python ${nvimPath}/generate-plugin-list.py
+          ${pythonEnv}/bin/python ${nvimPath}/generate-plugins-list.py
         '';
       };
 
       nixosConfigurations = {
         laptop1 = nixpkgs.lib.nixosSystem {
-          inherit system pkgs;
+          inherit system;
           modules = [
             ./src/machines/laptop1/configuration.nix
-            home-manager.nixosModules.home-manager
-            { home-manager.users.anthony = import ./src/users/anthony/home.nix; }
           ];
-          extraSpecialArgs = {
-            myNvim = neovim-custom;
-          };
         };
       };
 
       homeConfigurations = {
         anthony = home-manager.lib.homeManagerConfiguration {
-          inherit system pkgs;
+          inherit pkgs;
 
           # Specify your home configuration modules here, for example,
           # the path to your home.nix.
@@ -84,7 +84,7 @@
           # Optionally use extraSpecialArgs
           # to pass through arguments to home.nix
           extraSpecialArgs = {
-            myNvim = neovim-custom;
+            myNvim = myNvim;
           };
         };
       };

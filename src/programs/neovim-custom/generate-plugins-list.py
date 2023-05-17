@@ -10,7 +10,7 @@ repos = [
     "kylechui/nvim-surround",
     "windwp/nvim-autopairs",
     "numToStr/Comment.nvim",
-    "nvim-treesitter/nvim-treesitter-context",
+    # "nvim-treesitter/nvim-treesitter-context",
     "nvim-treesitter/playground",
     "lukas-reineke/indent-blankline.nvim",
     "kevinhwang91/promise-async",
@@ -57,9 +57,9 @@ template = """
 }}
 """
 
-plugin_lua_directory = './nvim/plugin'
+plugin_lua_directory = './src/programs/neovim-custom/nvim/plugin'
 
-with open("plugins-list.nix", "w") as f:
+with open("./src/programs/neovim-custom/plugins-list.nix", "w") as f:
     f.write("[\n")
     for repo in repos:
         user, repo_name = repo.split("/")
@@ -72,12 +72,12 @@ with open("plugins-list.nix", "w") as f:
         f.write(template.format(name=plugin_name, url=url, sha256=sha256))
 
         # Create an empty Lua file if it doesn't exist
-        lua_file_path = os.path.join(plugin_lua_directory, f"{plugin_name}.lua")
-        if not os.path.exists(lua_file_path):
-            with open(lua_file_path, 'w') as lua_file:
-                pass
+        # lua_file_path = os.path.join(plugin_lua_directory, f"{plugin_name}.lua")
+        # if not os.path.exists(lua_file_path):
+        #     with open(lua_file_path, 'w') as lua_file:
+        #         pass
 
     f.write("]\n")
 
-print("plugins-list.nix and empty Lua files generated.", file=sys.stderr)
+print("plugins-list.nix generated.", file=sys.stderr)
 

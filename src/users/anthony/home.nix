@@ -1,12 +1,12 @@
-{ config, pkgs, lib, myNvim, ... }:
+{ config, pkgs, lib, ... }:
 {
   home = {
     username = "anthony";
     homeDirectory = "/home/anthony";
     stateVersion = "22.11";
     packages = with pkgs; [
-      myNvim
       zathura
+      ghc
     ];
   };
   programs = {
